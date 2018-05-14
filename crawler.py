@@ -1,3 +1,5 @@
+from bs4 import BeautifulSoup
+
 def get_page(url): 
 	try: 
 		import urllib 
@@ -32,5 +34,10 @@ def print_all_links(page):
 
 
 
-url = 'https://xkcd.com/355'
+url = input("Enter your crawler seed url:")
 print_all_links(get_page(url))
+print("****************************")
+soup = BeautifulSoup(get_page(url), 'html.parser')
+
+for link in soup.find_all('a'):
+    print(link.get('href'))
