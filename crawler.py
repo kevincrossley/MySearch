@@ -37,7 +37,12 @@ def print_all_links(page):
 url = input("Enter your crawler seed url:")
 print_all_links(get_page(url))
 print("****************************")
+
 soup = BeautifulSoup(get_page(url), 'html.parser')
 
 for link in soup.find_all('a'):
     print(link.get('href'))
+
+
+
+
