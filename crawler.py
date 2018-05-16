@@ -66,22 +66,50 @@ def crawl_web(seed, max_pages, max_depth):
 	crawled = []
 	next_depth = []
 	depth = 0
+	index = []
 	while toCrawl and depth <= max_depth:
 		page = toCrawl.pop()
 		if page not in crawled and len(crawled) < max_pages:
-			union(next_depth, get_all_links(get_page(page)))
+			content = get_page(page)
+			add_page_to_index(index, page, content)
+			union(next_depth, get_all_links(content))
 			crawled.append(page)
 		if not toCrawl:
 			toCrawl, next_depth = next_depth, []
 			depth = depth + 1
 
-	return crawled
+	return index
 
-max_pages = 100
+
+def add_to_index(index, keyword, url):
+	for entry in index:
+		if entry[0] == keyword:
+			entry[1].append(url)
+			return
+	index.append([keyword,[url]])
+	return
+
+
+def lookup(index,keyword):
+    for entry in index:
+        if entry[0] == keyword:
+            return entry[1]
+    return []
+
+
+def add_page_to_index(index, url, content):
+	words = content.split()
+	for word in words:
+		add_to_index(index, word, url)
+
+
+max_pages = 10
 max_depth = 1
 seed = input("Enter your crawler seed url:")
-links = crawl_web(seed, max_pages, max_depth)
-print_nice_list(links)
+database = crawl_web(seed, max_pages, max_depth)
+
+result = lookup(database, 'I')
+print_nice_list(result)
 
 ''' Example Seeds '''
 # https://udacity.github.io/cs101x/index.html
