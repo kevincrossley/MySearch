@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-
+import time
 
 def get_page(url): 
 	try: 
@@ -66,7 +66,7 @@ def crawl_web(seed, max_pages, max_depth):
 	crawled = []
 	next_depth = []
 	depth = 0
-	index = []
+	index = {}
 	while toCrawl and depth <= max_depth:
 		page = toCrawl.pop()
 		if page not in crawled and len(crawled) < max_pages:
@@ -90,29 +90,37 @@ def record_user_click(index, keyword, url):
 
 
 def add_to_index(index, keyword, url):
-    # format of index: [[keyword, [[url, count], [url, count],..]],...]
-    for entry in index:
-        if entry[0] == keyword:
-            for urls in entry[1]:
-                if urls[0] == url:
-                    return
-            entry[1].append([url,0])
-            return
-    # not found, add new keyword to index
-    index.append([keyword, [[url,0]]])
+    # dictionary version - does not check for duplicate urls
+    if keyword in index:
+    	if url not in index[keyword]:
+    		index[keyword].append(url)
+    else:
+    	index[keyword] = [url]
+
+    # # old list version- checks for duplicate urls 
+    # # format of index: [[keyword, [[url, count], [url, count],..]],...]
+    # for entry in index:
+    #     if entry[0] == keyword:
+    #         for urls in entry[1]:
+    #             if urls[0] == url:
+    #                 return
+    #         entry[1].append([url,0])
+    #         return
+    # # not found, add new keyword to index
+    # index.append([keyword, [[url,0]]])
 
 
 def lookup(index,keyword):
-    for entry in index:
-        if entry[0] == keyword:
-            return entry[1]
-    return []
+    if keyword in index:
+    	return index[keyword]
+    else:
+    	return None
 
 
 def add_page_to_index(index, url, content):
-	# 	words = content.split()
-	splitlist = [' ', '(', ')',':',';',',','.','!','?','"']
-	words = split_string(content, splitlist)
+	words = content.split()
+	# splitlist = [' ', '(', ')',':',';',',','.','!','?','"']
+	# words = split_string(content, splitlist)
 	for word in words:
 		add_to_index(index, word, url)
 
@@ -132,19 +140,26 @@ def split_string(source, splitlist):
 	return output
 
 
+def stopwatch(code):
+	start = time.clock()
+	result = eval(code)
+	run_time = time.clock() - start
+	return result, run_time
+
+
 max_pages = 10
-max_depth = 1
-seed = input("Enter your crawler seed url:")
+max_depth = 3
+seed = "https://udacity.github.io/cs101x/index.html"
+# seed = input("Enter your crawler seed url:")
 database = crawl_web(seed, max_pages, max_depth)
 
 result = lookup(database, 'I')
 print_nice_list(result)
 
-''' Example Seeds '''
+# Example Seeds
 # https://udacity.github.io/cs101x/index.html
 # https://en.wikipedia.org/wiki/Main_Page
 # https://www.google.com/
-
 
 
 
