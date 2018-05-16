@@ -81,13 +81,25 @@ def crawl_web(seed, max_pages, max_depth):
 	return index
 
 
+def record_user_click(index, keyword, url):
+    urls = lookup(index, keyword)
+    if urls:
+        for entry in urls:
+            if entry[0] == url:
+                entry[1] = entry[1]+1
+
+
 def add_to_index(index, keyword, url):
-	for entry in index:
-		if entry[0] == keyword:
-			entry[1].append(url)
-			return
-	index.append([keyword,[url]])
-	return
+    # format of index: [[keyword, [[url, count], [url, count],..]],...]
+    for entry in index:
+        if entry[0] == keyword:
+            for urls in entry[1]:
+                if urls[0] == url:
+                    return
+            entry[1].append([url,0])
+            return
+    # not found, add new keyword to index
+    index.append([keyword, [[url,0]]])
 
 
 def lookup(index,keyword):
@@ -98,9 +110,26 @@ def lookup(index,keyword):
 
 
 def add_page_to_index(index, url, content):
-	words = content.split()
+	# 	words = content.split()
+	splitlist = [' ', '(', ')',':',';',',','.','!','?','"']
+	words = split_string(content, splitlist)
 	for word in words:
 		add_to_index(index, word, url)
+
+
+def split_string(source, splitlist):
+	output = []
+	atsplit = True
+	for char in source:
+		if char in splitlist:
+			atsplit = True
+		else:
+			if atsplit:
+				output.append(char)
+				atsplit = False
+			else:
+				output[-1] = output[-1] + char
+	return output
 
 
 max_pages = 10
