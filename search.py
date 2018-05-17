@@ -41,15 +41,17 @@ def quicksort_pages(pages, ranks):
 
 
 def print_nice_list(p):
-	i = 0
-	print '\n************ Start of List ************\n' 
-	
-	while i < len(p):
-		print p[i]
-		i = i + 1
+	if p:
+		i = 0
+		print '\n************ Start of List ************\n' 
+		
+		while i < len(p):
+			print p[i]
+			i = i + 1
 
-	print '\n************  End of List  ************\n'
-
+		print '\n************  End of List  ************\n'
+	else:
+		print 'No List'
 
 # Read in index.txt and rank.txt
 with open('index.txt') as ifile:
@@ -65,7 +67,7 @@ searchterm = input("Enter your search term in quotes:")
 # Execute a search for a keyword and see ranked list of pages with that term
 result = ordered_search(index, ranks, searchterm)
 
-if result == None:
+if not result:
 	lucky = None
 else:
 	lucky = result[0] # could also call lucky_search if all you want is top option

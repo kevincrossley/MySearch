@@ -105,7 +105,7 @@ def add_to_index(index, keyword, url):
 def add_page_to_index(index, url, content):
 	content = remove_tags(content)
 	# words = content.split()
-	splitlist = [' ', '(', ')',':',';',',','.','!','?','"','\n']
+	splitlist = [' ', '(', ')',':',';',',','.','!','?','"','\n','[',']','\t']
 	words = split_string(content.lower(), splitlist)
 	for word in words:
 		add_to_index(index, word, url)
@@ -142,9 +142,10 @@ def remove_tags(string):
 	return string
 
 
-max_pages = 10
-max_depth = 3
-seed = "https://udacity.github.io/cs101x/urank/"
+max_pages = 25
+max_depth = 2
+# seed = "https://udacity.github.io/cs101x/urank/"
+seed = "https://www.seas.upenn.edu/directory/profile.php?ID=107"
 # seed = input("Enter your crawler seed url:")
 
 # Example Seeds
