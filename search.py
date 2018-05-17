@@ -40,31 +40,37 @@ def quicksort_pages(pages, ranks):
 		return quicksort_pages(better, ranks) + [pages[0]] + quicksort_pages(worse, ranks)
 
 
+def print_nice_list(p):
+	i = 0
+	print '\n************ Start of List ************\n' 
+	
+	while i < len(p):
+		print p[i]
+		i = i + 1
+
+	print '\n************  End of List  ************\n'
+
+
 # Read in index.txt and rank.txt
-
-# ifile = open('index.txt','r')
-# rfile = open('rank.txt','r')
-# index = ifile.read()
-# ranks = rfile.read()
-
 with open('index.txt') as ifile:
     	index = json.load(ifile)
 with open('rank.txt') as rfile:
     	ranks = json.load(rfile)
 
+
 # assign searchterm
-searchterm = 'Kevin'
-# searchterm = input("Enter your search term:")
+# searchterm = 'Kevin'
+searchterm = input("Enter your search term in quotes:")
 
 # Execute a search for a keyword and see ranked list of pages with that term
 result = ordered_search(index, ranks, searchterm)
 
 if result == None:
-	result = None
+	lucky = None
 else:
 	lucky = result[0] # could also call lucky_search if all you want is top option
 
-print result
+print_nice_list(result)
 
 # Close Files
 ifile.close()
