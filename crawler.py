@@ -1,5 +1,6 @@
-from bs4 import BeautifulSoup
 import time
+import json
+from bs4 import BeautifulSoup
 
 def get_page(url): 
 	try: 
@@ -51,36 +52,29 @@ def print_nice_list(p):
 	print '\n************  End of List  ************\n'
 
 
-def soup_crawl(page):
-	soupLinks = []
-	soup = BeautifulSoup(page, 'html.parser')
-
-	for link in soup.find_all('a'):
-	    soupLinks.append(link.get('href'))
-	    
-	return soupLinks
-
-
 def crawl_web(seed, max_pages, max_depth):
 	toCrawl = [seed]
 	crawled = []
 	next_depth = []
 	depth = 0
 	index = {}
+	graph = {}
 	while toCrawl and depth <= max_depth:
 		page = toCrawl.pop()
 		if page not in crawled and len(crawled) < max_pages:
 			content = get_page(page)
 			add_page_to_index(index, page, content)
-			union(next_depth, get_all_links(content))
+			outlinks = get_all_links(content)
+			graph[page] = outlinks
+			union(next_depth, outlinks)
 			crawled.append(page)
 		if not toCrawl:
 			toCrawl, next_depth = next_depth, []
 			depth = depth + 1
 
-	return index
+	return index, graph
 
-
+'''
 def record_user_click(index, keyword, url):
     urls = lookup(index, keyword)
     if urls:
@@ -89,38 +83,29 @@ def record_user_click(index, keyword, url):
                 entry[1] = entry[1]+1
 
 
+def soup_crawl(page):
+	soupLinks = []
+	soup = BeautifulSoup(page, 'html.parser')
+
+	for link in soup.find_all('a'):
+	    soupLinks.append(link.get('href'))
+    return soupLinks
+'''
+
 def add_to_index(index, keyword, url):
     # dictionary version - does not check for duplicate urls
     if keyword in index:
-    	if url not in index[keyword]:
+    	if url not in index[keyword]: 
+    		# comment out the above if statement to include duplicate entries
     		index[keyword].append(url)
     else:
     	index[keyword] = [url]
 
-    # # old list version- checks for duplicate urls 
-    # # format of index: [[keyword, [[url, count], [url, count],..]],...]
-    # for entry in index:
-    #     if entry[0] == keyword:
-    #         for urls in entry[1]:
-    #             if urls[0] == url:
-    #                 return
-    #         entry[1].append([url,0])
-    #         return
-    # # not found, add new keyword to index
-    # index.append([keyword, [[url,0]]])
-
-
-def lookup(index,keyword):
-    if keyword in index:
-    	return index[keyword]
-    else:
-    	return None
-
 
 def add_page_to_index(index, url, content):
-	words = content.split()
-	# splitlist = [' ', '(', ')',':',';',',','.','!','?','"']
-	# words = split_string(content, splitlist)
+	# words = content.split()
+	splitlist = [' ', '(', ')',':',';',',','.','!','?','"','<','>']
+	words = split_string(content, splitlist)
 	for word in words:
 		add_to_index(index, word, url)
 
@@ -144,24 +129,44 @@ def stopwatch(code):
 	start = time.clock()
 	result = eval(code)
 	run_time = time.clock() - start
-	return result, run_time
+	return run_time
 
 
 max_pages = 10
 max_depth = 3
-seed = "https://udacity.github.io/cs101x/index.html"
+seed = "https://udacity.github.io/cs101x/urank/"
 # seed = input("Enter your crawler seed url:")
-database = crawl_web(seed, max_pages, max_depth)
-
-result = lookup(database, 'I')
-print_nice_list(result)
 
 # Example Seeds
 # https://udacity.github.io/cs101x/index.html
 # https://en.wikipedia.org/wiki/Main_Page
 # https://www.google.com/
+# https://udacity.github.io/cs101x/urank/
+# https://www.udacity.com/cs101x/urank/index.html
+
+# Crawl Web to create an index of all content on page
+# 	and a graph documenting connections of links
+index, graph = crawl_web(seed, max_pages, max_depth)
+
+# Write index and graph to output files
+# 	for now, overwrite every time
+# 	should append unless already indexed
+# 	probably can incoporate read/write to file inside crawl_web function
+
+# Write to file using json
+with open('index.txt', 'w') as ifile:
+	json.dump(index, ifile)
+with open('graph.txt', 'w') as gfile:
+	json.dump(graph, gfile)
 
 
+# # file-append.py
+# f = open('helloworld.txt','a')
+# f.write('\n' + 'hello world')
+# f.close()
 
+# Close files 
+ifile.close()
+gfile.close()
 
 
