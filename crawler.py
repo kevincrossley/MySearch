@@ -103,8 +103,9 @@ def add_to_index(index, keyword, url):
 
 
 def add_page_to_index(index, url, content):
+	content = remove_tags(content)
 	# words = content.split()
-	splitlist = [' ', '(', ')',':',';',',','.','!','?','"','<','>','\n']
+	splitlist = [' ', '(', ')',':',';',',','.','!','?','"','\n']
 	words = split_string(content.lower(), splitlist)
 	for word in words:
 		add_to_index(index, word, url)
@@ -132,6 +133,15 @@ def stopwatch(code):
 	return run_time
 
 
+def remove_tags(string):
+	start = string.find('<')
+	while start != -1:
+		end = string.find('>', start)
+		string = string[:start] + " " + string[end + 1:]
+		start = string.find('<')
+	return string
+
+
 max_pages = 10
 max_depth = 3
 seed = "https://udacity.github.io/cs101x/urank/"
@@ -139,7 +149,7 @@ seed = "https://udacity.github.io/cs101x/urank/"
 
 # Example Seeds
 # https://udacity.github.io/cs101x/index.html
-# https://en.wikipedia.org/wiki/Main_Page
+# https://en.wikipedia.org/wiki/Wikipedia
 # https://www.google.com/
 # https://udacity.github.io/cs101x/urank/
 # https://www.udacity.com/cs101x/urank/index.html
