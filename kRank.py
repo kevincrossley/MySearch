@@ -1,7 +1,7 @@
 import json
 
 
-def compute_ranks(graph):
+def compute_ranks(graph, k):
 	d = 0.8 # damping factor - propability of selecting link on current page or randomly jumping
 	numloops = 10 # number of iterations
 	
@@ -17,19 +17,35 @@ def compute_ranks(graph):
 			
 			for node in graph:
 				if page in graph[node]:
-					newrank = newrank + d * (ranks[node] / len(graph[node]))
+					# next line is about reciprocal links
+					# line below if statement is indented when if statement active
+					if not is_reciprocal_link(graph, node, page, k):
+						newrank = newrank + d * (ranks[node] / len(graph[node]))
 
 			newranks[page] = newrank
 		ranks = newranks
 	return ranks
 
 
+def is_reciprocal_link(graph, source, destination, k):
+	if k == 0:
+		if destination == source:
+			return True
+		return False
+	if source in graph[destination]:
+		return True
+	for node in graph[destination]:
+		if is_reciprocal_link(graph, source, node, k - 1):
+			return True
+	return False
+
 # Read in the graph 
 with open('graph.txt') as gfile:
     	graph = json.load(gfile)
 
 # Compute the rank of each page indexed (Page Rank algorithm)
-ranks = compute_ranks(graph)
+k = 0 # threshold for reciprocal link calculation. setting to zero should only include links to itself
+ranks = compute_ranks(graph, k)
 
 # Write to ranks output file
 # 	should probably also adapt this to append newly indexed pages 
